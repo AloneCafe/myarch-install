@@ -1,0 +1,46 @@
+#!/bin/bash
+
+echo -e "[INSTALL]Adding a wheel group user named paslone..\n"
+useradd -m -g wheel -s /bin/bash paslone
+echo -e "[INSTALL]Setting the password of paslone..\n"
+passwd paslone
+
+read -p "Press any key to confirm /etc/sudoers for sudo of paslone." var
+nano /etc/sudoers
+
+wifi-menu
+echo -e "[INSTALL]Updating Database..\n"
+pacman -Syyu
+echo -e "[INSTALL]Installing full Xorg Environment..\n"
+pacman -S xorg-server xorg-utils xorg-server-utils xorg-xinit xorg-xclock xterm xorg-apps xorg-drivers xorg
+
+echo -e "[INSTALL]Installing the KDE Frameworks 5 for libraries and software frameworks..\n"
+pacman -S kf5 kf5-aids
+pacman -S plasma kdebase kdegraphics
+echo -e "[INSTALL]Removing the Plasma Media Center..\n"
+pacman -R plasma-mediacenter
+
+echo -e "[INSTALL]Installing and configure the SDDM..\n"
+pacman -S sddm sddm-kcm
+systemctl enable sddm
+echo -e '[Theme]\n# Current theme name\nCurrent=breeze\n# Cursor theme\nCursorTheme=breeze_cursors\n' > /etc/sddm.conf
+
+echo -e "[INSTALL]Installing some fonts..\n"
+pacman -S ttf-freefont ttf-symbola font-mathematica  noto-fonts noto-fonts-cjk noto-fonts-emoji adobe-source-han-sans-otc-fonts ttf-hannom wqy-bitmapfont opendesktop-fonts ttf-arphic-uming ttf-arphic-ukai wqy-zenhei wqy-microhei ttf-dejavu ttf-droid
+
+echo -e "[INSTALL]Installing GTK2/3 Enigines\n"
+pacman -S gtk-engines gtk2 gtk3 gnome-themes-standard gnome-icon-theme
+
+echo -e "[INSTALL]Setting System NTP services\n"
+pacman -S ntp
+systemctl enable ntpd
+
+echo -e "[INSTALL]Install the NetworkManager and DHCP\n"
+pacman -S networkmanager net-tools
+systemctl enable NetworkManager dhcpcd
+
+echo -e "[INSTALL]Install Audio Toolset...\n"
+pacman -S alsa-utils pulseaudio pulseaudio-alsa libcanberra-pulse libcanberra-gstreamer jack2-dbus
+
+read -p "Press any key to reboot" var
+reboot

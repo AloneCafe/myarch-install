@@ -1,0 +1,39 @@
+#!/bin/bash
+efivar -l
+echo -e "[INSTALL]Check EFI environment off...\n"
+read -p "Press any key to INSTALL." var
+echo -e "[INSTALL]Setting NTP services status to true...\n"
+
+wifi-menu
+timedatectl set-ntp true
+sed -i '/Score/{/China/!{n;s/^/#/}}' /etc/pacman.d/mirrorlist
+pacman -Syy
+
+#### Partiton Configure ####
+lsblk
+echo -e "[INSTALL]Formatting and setting disk...\n"
+mkfs.fat -F32 /dev/sda1
+mkswap /dev/sda2
+mkfs.ext4 /dev/sda3
+echo -e "[INSTALL]Configure Swapon..\n"
+swapon /dev/sda2
+
+echo -e "[INSTALL]Mountting devices...\n"
+mount /dev/sda3 /mnt
+mkdir -p /mnt/boot/EFI
+mount /dev/sda1 /mnt/boot/EFI
+
+echo -e "[INSTALL]Installing Base System...\n"
+pacstrap -i /mnt base base-devel
+echo -e "[INSTALL]Genarating fstab configuration file...\n"
+genfstab -U /mnt >> /mnt/etc/fstab
+echo -e "[INSTALL]The fstab configuration file context is:\n"
+cat /mnt/etc/fstab
+read -p "Press any key to chroot." var
+arch-chroot /mnt /bin/bash
+
+echo -e "[INSTALL]Chroot Execution quit!\n"
+echo -e "[INSTALL]Umounting partiton...\n"
+umount -R /mnt
+read -p "Press any key to reboot" var
+reboot

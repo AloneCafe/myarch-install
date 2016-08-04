@@ -1,0 +1,33 @@
+#!/bin/bash
+echo -e "[CHROOT]Setting Locale to China..\n"
+sed -i '/zh_CN.UTF-8/{s/#//}' /etc/locale.gen; \
+locale-gen; \
+echo LANG=zh_CN.UTF-8  > /etc/locale.conf
+
+echo -e "[CHROOT]Setting Timezone to Asia/Shanghai..\n"
+ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+echo -e "[CHROOT]Setting the Local Time to UTC Time..\n"
+hwclock --systohc --utc
+
+echo -e "[CHROOT]Setting Hostname to Paslinux..\n"
+HOSTNAME='Paslinux'; echo $HOSTNAME > /etc/hostname; \
+sed -i '/localhost/s/$/\t'"$HOSTNAME"'/g' /etc/hosts
+
+echo -e "[CHROOT]Echo Current Hostname\n"
+cat /etc/hostname
+cat /etc/hosts
+
+echo -e "[CHROOT]Installing wifi-menu runtime packages...\n"
+pacman -S iw wpa_supplicant dialog
+wifi-menu
+
+echo -e "[CHROOT]Setting Archlinux root user password...\n"
+passwd
+
+echo -e "[CHROOT]Installing GRUB EFI Bootloader...\n"
+pacman -S dosfstools grub efibootmgr
+grub-install --target=x86_64-efi --efi-directory=/boot/EFI --bootloader-id=arch_grub --recheck
+grub-mkconfig -o /boot/grub/grub.cfg
+
+
