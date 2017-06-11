@@ -1,1 +1,0 @@
-# Archlinux-Install-Scripts
